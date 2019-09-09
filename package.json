@@ -1,0 +1,27 @@
+{
+  "name": "alb-fargate-demo",
+  "version": "1.0.0",
+  "description": "This project is based on [cfn-modules](https://github.com/cfn-modules).",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JanAhrens/alb-fargate-demo.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JanAhrens/alb-fargate-demo/issues"
+  },
+  "homepage": "https://github.com/JanAhrens/alb-fargate-demo#readme",
+  "dependencies": {
+    "@cfn-modules/alb": "^1.0.4",
+    "@cfn-modules/alb-listener": "^1.0.0",
+    "@cfn-modules/ecs-alb-target": "^1.1.0",
+    "@cfn-modules/ecs-cluster": "^1.1.0",
+    "@cfn-modules/fargate-service": "^2.5.0",
+    "@cfn-modules/vpc": "^1.1.1"
+  }
+}
