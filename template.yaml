@@ -1,0 +1,80 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'cfn-modules example'
+
+Parameters:
+  AppImage:
+    Default: 'widdix/hello:v1'
+    Type: String
+
+Resources:
+
+  Vpc:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      Parameters:
+        NumberOfAvailabilityZones: 3
+        S3Endpoint: false
+        DynamoDBEndpoint: false
+        FlowLog: 'reject-only'
+        FlowLogRetentionInDays: 1
+        NatGateways: true
+      TemplateURL: './node_modules/@cfn-modules/vpc/module.yml'
+
+  Alb:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      Parameters:
+        VpcModule: !GetAtt 'Vpc.Outputs.StackName' 
+        Scheme: 'internet-facing'
+        IdleTimeoutInSeconds: '60'
+      TemplateURL: './node_modules/@cfn-modules/alb/module.yml'
+
+  AlbListener:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      Parameters:
+        AlbModule: !GetAtt 'Alb.Outputs.StackName'
+        Port: '80'
+      TemplateURL: './node_modules/@cfn-modules/alb-listener/module.yml'
+
+  Target:
+      Type: 'AWS::CloudFormation::Stack'
+      Properties:
+        Parameters:
+          AlbModule: !GetAtt 'Alb.Outputs.StackName'
+          AlbListenerModule: !GetAtt 'AlbListener.Outputs.StackName'
+          VpcModule: !GetAtt 'Vpc.Outputs.StackName'
+        TemplateURL: './node_modules/@cfn-modules/ecs-alb-target/module.yml'
+
+  Cluster:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL: './node_modules/@cfn-modules/ecs-cluster/module.yml'
+
+  Service:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      Parameters:
+        VpcModule: !GetAtt 'Vpc.Outputs.StackName'
+        ClusterModule: !GetAtt 'Cluster.Outputs.StackName'
+        TargetModule: !GetAtt 'Target.Outputs.StackName'
+        AppImage: !Ref AppImage
+        AppPort: '80'
+        Cpu: '0.25'
+        Memory: '0.5'
+        DesiredCount: '1'
+        MaxCapacity: '4'
+        MinCapacity: '1'
+        LogsRetentionInDays: '14'
+        SubnetsReach: 'Public'
+        AutoScaling: 'true'
+        HealthCheckGracePeriodSeconds: '60'
+      TemplateURL: './node_modules/@cfn-modules/fargate-service/module.yml'
+
+  Repository:
+    Type: AWS::ECR::Repository
+
+Outputs:
+  Repository:
+      Value: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${Repository}
