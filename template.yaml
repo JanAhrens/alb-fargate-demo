@@ -18,7 +18,7 @@ Resources:
         DynamoDBEndpoint: false
         FlowLog: 'reject-only'
         FlowLogRetentionInDays: 1
-        NatGateways: true
+        NatGateways: false
       TemplateURL: './node_modules/@cfn-modules/vpc/module.yml'
 
   Alb:
