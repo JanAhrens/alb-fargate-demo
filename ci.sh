@@ -7,6 +7,8 @@ build_number=$(date +%s)
 repo=$(aws cloudformation describe-stacks --stack-name 'hello-fargate' | jq -r '.Stacks[0].Outputs[] | select(.OutputKey == "Repository").OutputValue')
 s3_bucket=cf-templates-gigzh34f6ajh-eu-west-1
 
+eval $(aws ecr get-login --no-include-email)
+
 docker build -t hello:$build_number .
 docker tag hello:$build_number $repo:$build_number
 docker push $repo:$build_number
